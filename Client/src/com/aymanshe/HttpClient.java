@@ -8,17 +8,19 @@ import java.util.Scanner;
 
 public class HttpClient {
 
-    public void sendRequest(HttpRequest httpRequest) throws Exception {
+    public String sendRequest(HttpRequest httpRequest) throws Exception {
         if (httpRequest.getMethod().equals("GET")) {
-            getRequest(httpRequest);
+            return getRequest(httpRequest);
         } else if (httpRequest.getMethod().equals("POST")) {
-            postRequest(httpRequest);
+            return postRequest(httpRequest);
         }else{
             System.out.println("Fix me baby one more time:"+ httpRequest.getMethod());
+            //todo handle return
+            return null;
         }
     }
 
-    private void getRequest(HttpRequest httpRequest) throws Exception {
+    private String getRequest(HttpRequest httpRequest) throws Exception {
         try {
             InetAddress address = InetAddress.getByName(httpRequest.getAddress());
 
@@ -30,19 +32,24 @@ public class HttpClient {
             out.write(command);
             out.flush();
 
+            StringBuilder stringBuilder = new StringBuilder();
             while (in.hasNextLine()) {
-                System.out.println(in.nextLine());
+                stringBuilder.append(in.nextLine());
+                stringBuilder.append("\r\n");
             }
+            String response = stringBuilder.toString();
 
             out.close();
             in.close();
             socket.close();
+
+            return response;
         } catch (IOException e) {
             throw new Exception(e.getMessage());
         }
     }
 
-    private void postRequest(HttpRequest httpRequest) {
-
+    private String postRequest(HttpRequest httpRequest) {
+        return "";
     }
 }
