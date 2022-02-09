@@ -1,19 +1,54 @@
 package com.aymanshe;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class HttpRequest {
     private String address;
-    private int port;
+    private String path;
+    private int port = 80;
     private String method;
-    private String url;
+    private boolean verbose = false;
+    private Map<String,String> header = new HashMap<>();
 
-    public HttpRequest(String address, int port, String method, String url) {
+
+    //region constructors
+    public HttpRequest() {
+    }
+
+    public HttpRequest(String address, int port, String method) {
         this.address = address;
         this.port = port;
         this.method = method;
-        this.url = url;
     }
+    //endregion
+
+    // region setters and getters
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public Map<String, String> getHeader() {
+        return header;
+    }
+
+    public void setHeader(Map<String, String> header) {
+        this.header = header;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     public String getAddress() {
         return address;
     }
@@ -37,13 +72,9 @@ public class HttpRequest {
     public void setMethod(String method) {
         this.method = method;
     }
+    //endregion
 
-    public String getUrl() {
-        return url;
+    public  void  addHeaderPair(String key,String value){
+        header.put(key,value);
     }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
 }
