@@ -1,3 +1,5 @@
+package com.aymanshe;
+
 class CommandParser {
     //httpc (get|post) [-v] (-h "k:v")* [-d inline-data] [-f file] URL
 

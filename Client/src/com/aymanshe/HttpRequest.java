@@ -1,3 +1,5 @@
+package com.aymanshe;
+
 import java.util.Locale;
 
 public class HttpRequest {
