@@ -26,7 +26,8 @@ public class HttpClient {
             PrintWriter out = new PrintWriter(socket.getOutputStream());
             Scanner in = new Scanner(socket.getInputStream());
 
-            out.write(httpRequest.getMethod() + " " + httpRequest.getUrl() + " " + "HTTP/1.0\r\n\r\n");
+            String command = httpRequest.getMethod() + " " + httpRequest.getPath() + " " + "HTTP/1.0\r\n\r\n";
+            out.write(command);
             out.flush();
 
             while (in.hasNextLine()) {
