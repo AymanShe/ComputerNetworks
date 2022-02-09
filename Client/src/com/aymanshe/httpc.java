@@ -37,8 +37,8 @@ public class httpc {
             if (!httpRequest.getMethod().equals("help")) {
                 // send the request and display content
                 HttpClient httpClient = new HttpClient();
-                String response = httpClient.sendRequest(httpRequest);
-                displayResult(httpRequest, response);
+                HttpResponse httpResponse = httpClient.sendRequest(httpRequest);
+                displayResult(httpRequest, httpResponse);
             } else {
                 //todo display help
             }
@@ -50,12 +50,12 @@ public class httpc {
         }
     }
 
-    private static void displayResult(HttpRequest httpRequest, String response) {
-        if (!httpRequest.isVerbose()){
-            int index = response.indexOf("{");
-            response = response.substring(index);
+    private static void displayResult(HttpRequest request, HttpResponse response) {
+        if (!request.isVerbose()){
+            System.out.println(response.getStatus());
+            System.out.println(response.getHeaders());
         }
-        System.out.println(response);
+        System.out.println(response.getBody());
     }
 
 }

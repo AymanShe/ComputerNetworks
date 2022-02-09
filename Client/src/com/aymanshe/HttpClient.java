@@ -8,36 +8,56 @@ import java.util.Scanner;
 
 public class HttpClient {
 
-    public String sendRequest(HttpRequest httpRequest) throws Exception {
-        if (httpRequest.getMethod().equals("GET")) {
-            return getRequest(httpRequest);
-        } else if (httpRequest.getMethod().equals("POST")) {
-            return postRequest(httpRequest);
+    public HttpResponse sendRequest(HttpRequest request) throws Exception {
+        if (request.getMethod().equals("GET")) {
+            return getRequest(request);
+        } else if (request.getMethod().equals("POST")) {
+            return postRequest(request);
         }else{
-            System.out.println("Fix me baby one more time:"+ httpRequest.getMethod());
+            System.out.println("Fix me baby one more time:"+ request.getMethod());
             //todo handle return
             return null;
         }
     }
 
-    private String getRequest(HttpRequest httpRequest) throws Exception {
+    private HttpResponse getRequest(HttpRequest request) throws Exception {
         try {
-            InetAddress address = InetAddress.getByName(httpRequest.getAddress());
+            InetAddress address = InetAddress.getByName(request.getAddress());
 
-            Socket socket = new Socket(address, httpRequest.getPort());
+            Socket socket = new Socket(address, request.getPort());
             PrintWriter out = new PrintWriter(socket.getOutputStream());
             Scanner in = new Scanner(socket.getInputStream());
 
-            String command = httpRequest.getMethod() + " " + httpRequest.getPath() + " " + "HTTP/1.0\r\n\r\n";
+            String command = request.getMethod() + " " + request.getPath() + " " + "HTTP/1.0\r\n\r\n";
             out.write(command);
             out.flush();
 
-            StringBuilder stringBuilder = new StringBuilder();
+            HttpResponse response = new HttpResponse();
+            //read status
+            String line = in.nextLine();
+            response.setStatus(line);
+            //read headers
+            String headers = "";
             while (in.hasNextLine()) {
-                stringBuilder.append(in.nextLine());
-                stringBuilder.append("\r\n");
+                line = in.nextLine();
+                if (!line.isEmpty()){
+                    headers += line;
+                    headers += "\r\n";
+                }else{
+                    break;
+                }
             }
-            String response = stringBuilder.toString();
+            response.setHeaders(headers);
+
+            //read body
+            String body = "";
+            while (in.hasNextLine()){
+                line = in.nextLine();
+                body +=line;
+                body += "\r\n";
+            }
+            response.setBody(body);
+
 
             out.close();
             in.close();
@@ -49,7 +69,7 @@ public class HttpClient {
         }
     }
 
-    private String postRequest(HttpRequest httpRequest) {
-        return "";
+    private HttpResponse postRequest(HttpRequest httpRequest) {
+        return null;
     }
 }
