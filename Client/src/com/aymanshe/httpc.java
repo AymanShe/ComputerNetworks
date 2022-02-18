@@ -3,6 +3,7 @@ package com.aymanshe;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 
 public class httpc {
 
@@ -87,7 +88,9 @@ public class httpc {
     private static void displayResult(HttpRequest request, HttpResponse response) {
         if (request.isVerbose()){
             System.out.println(response.getStatus());
-            System.out.println(response.getHeaders());
+            for (var header : response.getHeaders().entrySet()) {
+                System.out.println(header.getKey() + ":" + header.getValue());
+            }
         }
         if (request.isWriteToFile()){
             try {

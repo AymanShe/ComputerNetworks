@@ -96,13 +96,12 @@ public class HttpClient {
         while (in.hasNextLine()) {
             line = in.nextLine();
             if (!line.isEmpty()){
-                headers += line;
-                headers += "\r\n";
+                String[] splitHeader = line.split(":");
+                response.addHeader(splitHeader[0], splitHeader[1]);
             }else{
                 break;
             }
         }
-        response.setHeaders(headers);
 
         //read body
         StringBuilder body = new StringBuilder();
