@@ -65,7 +65,10 @@ public class HttpClient {
             	headers.append("\r\n");
             }
 
-            String command = request.getMethod() + " " + (request.getPath().isEmpty()? "/" : request.getPath()) + " " + "HTTP/1.0\r\n" + headers + "Content-Length: " + request.getBody().length() + "\r\n\r\n" + request.getBody();
+            String command = request.getMethod() + " " + (request.getPath().isEmpty()? "/" : request.getPath()) + " " + "HTTP/1.0\r\n"
+                    + headers
+                    + "Content-Length: " + request.getBody().length() + "\r\n\r\n"
+                    + request.getBody();
             out.write(command);
             out.flush();
 

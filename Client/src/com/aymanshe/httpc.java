@@ -1,5 +1,9 @@
 package com.aymanshe;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class httpc {
 
     /**
@@ -84,6 +88,18 @@ public class httpc {
         if (request.isVerbose()){
             System.out.println(response.getStatus());
             System.out.println(response.getHeaders());
+        }
+        if (request.isWriteToFile()){
+            try {
+                File file = new File(request.getFileName());
+                file.createNewFile();
+                FileWriter fileWriter = new FileWriter(request.getFileName());
+                fileWriter.write(response.getBody());
+                fileWriter.close();
+                System.out.println("--- response body was successfully written to the file ---");
+            } catch (IOException e) {
+                System.out.println("An error occurred while writing response to the file.");
+            }
         }
         System.out.println("--- response body ---");
         System.out.println(response.getBody());

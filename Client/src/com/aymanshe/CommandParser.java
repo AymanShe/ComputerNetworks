@@ -87,19 +87,24 @@ class CommandParser {
                     // todo validate a correct path txt and json are accepted only
                     String bodyFilePath = args[++i];
                     try {
-                        File myObj = new File(bodyFilePath);
-                        Scanner myReader = new Scanner(myObj);
+                        File file = new File(bodyFilePath);
+                        Scanner scanner = new Scanner(file);
                         StringBuilder data = new StringBuilder();
-                        while (myReader.hasNextLine()) {
-                            data.append(myReader.nextLine());
+                        while (scanner.hasNextLine()) {
+                            data.append(scanner.nextLine());
                         }
                         request.setBody(data.toString());
-                        myReader.close();
+                        scanner.close();
                     } catch (FileNotFoundException e) {
                         throw new CommandParseException("File not found");
                     }
                     request.setInlineBody(false);
                     request.setBodyFilePath(bodyFilePath);
+                }
+                case "-o" ->{
+                    String fileName = args[++i];
+                    request.setWriteToFile(true);
+                    request.setFileName(fileName);
                 }
             }
         }
@@ -184,6 +189,13 @@ class CommandParser {
                         throw new CommandParseException("Duplicate argument -f");
                     }
                     map.put("-f", true);
+                    i++;
+                }
+                case "-o" -> {
+                    if (map.get("-o") != null) {
+                        throw new CommandParseException("Duplicate argument -o");
+                    }
+                    map.put("-o", true);
                     i++;
                 }
                 default -> throw new CommandParseException("There is an unknown argument: " + args[i]);

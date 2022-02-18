@@ -14,6 +14,8 @@ public class HttpRequest {
     private String path;
     private String address;
     private int port = 80;
+    private boolean writeToFile = false;
+    private String fileName;
 
 
     //region constructors
@@ -98,6 +100,22 @@ public class HttpRequest {
     
     public void setBodyFilePath(String bodyFilePath) {
     	this.bodyFilePath = bodyFilePath;
+    }
+
+    public boolean isWriteToFile() {
+        return writeToFile;
+    }
+
+    public void setWriteToFile(boolean writeToFile) {
+        this.writeToFile = writeToFile;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
     //endregion
 
