@@ -10,6 +10,7 @@ public class httpc {
     public static void main(String[] args) {
         //region Validations
         //check if the minimum number of argument is provided
+    	//todo consider doing an interactive app with a while
         if (args.length == 0) {
             System.out.println("The command cannot be empty");
             System.out.println("Please enter the command following this format: httpc (get|post) [-v] (-h \"k:v\")* [-d inline-data] [-f file] URL");
@@ -22,7 +23,7 @@ public class httpc {
             return;
         }
 
-        if (args.length < 3) {
+        if (args.length < 2) {
             System.out.println("The command has too few arguments");
             System.out.println("Please enter the command following this format: httpc (get|post) [-v] (-h \"k:v\")* [-d inline-data] [-f file] URL");
             return;
@@ -34,27 +35,57 @@ public class httpc {
             //parse into request
             HttpRequest httpRequest = CommandParser.parse(args);
 
-            if (!httpRequest.getMethod().equals("help")) {
+            if (!httpRequest.getMethod().equals("HELP")) {
                 // send the request and display content
                 HttpClient httpClient = new HttpClient();
                 HttpResponse httpResponse = httpClient.sendRequest(httpRequest);
                 displayResult(httpRequest, httpResponse);
             } else {
-                //todo display help
+                displayHelp(args);
             }
         } catch (CommandParseException e) {
             System.out.println(e.getMessage());
         } catch (Exception e) {
-            //TODO print a better message
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static void displayHelp(String[] args) {
+        if (args.length>2){
+            if (args[2].equals("get")){
+                System.out.println("usage: httpc get [-v] [-h key:value] URL");
+                System.out.println("Get executes a HTTP GET request for a given URL.");
+                System.out.println("\t-v\tPrints the detail of the response such as protocol, status, and headers.");
+                System.out.println("\t-h key:value\tAssociates headers to HTTP Request with the format 'key:value'.");
+            } else if (args[2].equals("post")){
+                System.out.println("usage: httpc post [-v] [-h key:value] [-d inline-data] [-f file] URL");
+                System.out.println("Post executes a HTTP POST request for a given URL with inline data or from file.");
+                System.out.println("\t-v\tPrints the detail of the response such as protocol, status, and headers.");
+                System.out.println("\t-h key:value\tAssociates headers to HTTP Request with the format 'key:value'.");
+                System.out.println("\t-d 'string'\tAssociates an inline data to the body HTTP POST request.");
+                System.out.println("\t-f file\tAssociates the content of a file to the body HTTP POST request.");
+                System.out.println("");
+                System.out.println("Either [-d] or [-f] can be used but not both.");
+            }
+        }else{
+            System.out.println("httpc is a curl-like application but supports HTTP protocol only.");
+            System.out.println("Usage:");
+            System.out.println("\thttpc command [arguments]");
+            System.out.println("The commands are:");
+            System.out.println("\tget\texecutes a HTTP GET request and prints the response.");
+            System.out.println("\tpost\texecutes a HTTP POST request and prints the response.");
+            System.out.println("\thelp\tprints this screen.");
+            System.out.println("");
+            System.out.println("Use \"httpc help [command]\" for more information about a command.");
         }
     }
 
     private static void displayResult(HttpRequest request, HttpResponse response) {
-        if (!request.isVerbose()){
+        if (request.isVerbose()){
             System.out.println(response.getStatus());
             System.out.println(response.getHeaders());
         }
+        System.out.println("--- response body ---");
         System.out.println(response.getBody());
     }
 

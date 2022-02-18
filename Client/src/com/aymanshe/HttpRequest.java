@@ -1,16 +1,19 @@
 package com.aymanshe;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class HttpRequest {
-    private String address;
-    private String path;
-    private int port = 80;
     private String method;
     private boolean verbose = false;
-    private Map<String,String> header = new HashMap<>();
+    private List<String> header = new ArrayList<>();
+    private boolean inlineBody;
+    private String body;
+    private String bodyFilePath;
+    private String path;
+    private String address;
+    private int port = 80;
 
 
     //region constructors
@@ -33,16 +36,24 @@ public class HttpRequest {
         this.path = path;
     }
 
-    public Map<String, String> getHeader() {
+    public List<String> getHeader() {
         return header;
     }
 
-    public void setHeader(Map<String, String> header) {
+    public void setHeader(List<String> header) {
         this.header = header;
     }
 
     public boolean isVerbose() {
         return verbose;
+    }
+
+    public void setInlineBody(boolean inlineBody) {
+        this.inlineBody = inlineBody;
+    }
+
+    public boolean isInlineBody() {
+        return inlineBody;
     }
 
     public void setVerbose(boolean verbose) {
@@ -72,9 +83,25 @@ public class HttpRequest {
     public void setMethod(String method) {
         this.method = method;
     }
+    
+    public String getBody() {
+    	return body;
+    }
+    
+    public void setBody(String body) {
+    	this.body = body;
+    }
+    
+    public String getBodyFilePath() {
+    	return bodyFilePath;
+    }
+    
+    public void setBodyFilePath(String bodyFilePath) {
+    	this.bodyFilePath = bodyFilePath;
+    }
     //endregion
 
-    public  void  addHeaderPair(String key,String value){
-        header.put(key,value);
+    public  void  addHeaderPair(String fullHeader){
+        header.add(fullHeader);
     }
 }
