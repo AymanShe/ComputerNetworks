@@ -1,17 +1,15 @@
 package com.aymanshe;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class HttpResponse {
     String status;
-    String headers;
+    Map<String, String> headers;
     String body;
 
     public HttpResponse() {
-    }
-
-    public HttpResponse(String status, String headers, String body) {
-        this.status = status;
-        this.headers = headers;
-        this.body = body;
+        headers = new HashMap<>();
     }
 
     public String getStatus() {
@@ -22,12 +20,16 @@ public class HttpResponse {
         this.status = status;
     }
 
-    public String getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
-    public void setHeaders(String headers) {
+    public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    public  void addHeader(String key, String value){
+        headers.put(key, value);
     }
 
     public String getBody() {

@@ -10,11 +10,25 @@ public class HttpClient {
 
     public HttpResponse sendRequest(HttpRequest request) throws Exception {
         if (request.getMethod().equals("GET")) {
-            //todo check and redirect here for(3)
-            return getRequest(request);
+            HttpResponse response = getRequest(request);
+            if (response.getStatus().split(" ")[1].startsWith("30")){
+                //adjust the url
+                String newUrl = response.getHeaders().get("Location");
+                request.setAddress(newUrl);
+                //call get request again
+                response = getRequest(request);
+            }
+            return response;
         } else if (request.getMethod().equals("POST")) {
-            //todo check and redirect here for(3)
-            return postRequest(request);
+            HttpResponse response = postRequest(request);
+            if (response.getStatus().split(" ")[1].startsWith("30")){
+                //adjust the url
+                String newUrl = response.getHeaders().get("Location");
+                request.setAddress(newUrl);
+                //call get request again
+                response = postRequest(request);
+            }
+            return response;
         }else{
             throw  new Exception("Something went wrong. Could not find correct method. HttpClient.sendRequest");
         }
