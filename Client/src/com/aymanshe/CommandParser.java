@@ -114,12 +114,19 @@ class CommandParser {
         validateUrl(i,args);
         String fullUrl = args[args.length - 1];
         String url = fullUrl.replace("'", "");
+        request = processUrl(url, request);
+
+
+        return request;
+    }
+
+    public static HttpRequest processUrl(String url, HttpRequest request) throws CommandParseException {
         // protocol
         int endOfProtocolIndex = url.indexOf("http://");
         if (endOfProtocolIndex == -1) {
             endOfProtocolIndex = url.indexOf("https://");
             if (endOfProtocolIndex == -1) {
-                throw new CommandParseException("Please check the format of the url. you entered: " + fullUrl);
+                throw new CommandParseException("Please check the format of the url. you entered: " + url);
             } else {
                 endOfProtocolIndex += 8;
             }
@@ -143,7 +150,6 @@ class CommandParser {
         request.setPath(path);
 
         // endregion
-
         return request;
     }
 

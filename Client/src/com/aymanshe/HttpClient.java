@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.text.BreakIterator;
 import java.util.Scanner;
 
 public class HttpClient {
@@ -14,7 +15,10 @@ public class HttpClient {
             if (response.getStatus().split(" ")[1].startsWith("30")){
                 //adjust the url
                 String newUrl = response.getHeaders().get("Location");
-                request.setAddress(newUrl);
+                if (newUrl == null){
+                    return response;
+                }
+                request = CommandParser.processUrl(newUrl, request);
                 //call get request again
                 response = getRequest(request);
             }
@@ -24,7 +28,10 @@ public class HttpClient {
             if (response.getStatus().split(" ")[1].startsWith("30")){
                 //adjust the url
                 String newUrl = response.getHeaders().get("Location");
-                request.setAddress(newUrl);
+                if (newUrl == null){
+                    return response;
+                }
+                request = CommandParser.processUrl(newUrl, request);
                 //call get request again
                 response = postRequest(request);
             }
