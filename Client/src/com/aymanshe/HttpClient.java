@@ -117,8 +117,9 @@ public class HttpClient {
         while (in.hasNextLine()) {
             line = in.nextLine();
             if (!line.isEmpty()){
+                int endOfKey = line.indexOf(":");
                 String[] splitHeader = line.split(":");
-                response.addHeader(splitHeader[0], splitHeader[1]);
+                response.addHeader(line.substring(0,endOfKey), line.substring(endOfKey+1));
             }else{
                 break;
             }

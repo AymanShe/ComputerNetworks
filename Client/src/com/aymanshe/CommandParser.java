@@ -91,8 +91,9 @@ class CommandParser {
                         Scanner scanner = new Scanner(file);
                         StringBuilder data = new StringBuilder();
                         while (scanner.hasNextLine()) {
-                            data.append(scanner.nextLine());
+                            data.append(scanner.nextLine()).append("\r\n");
                         }
+                        data.delete(data.length()-2,data.length());
                         request.setBody(data.toString());
                         scanner.close();
                     } catch (FileNotFoundException e) {

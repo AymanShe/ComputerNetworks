@@ -1,16 +1,15 @@
 package com.aymanshe;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.function.BiFunction;
 
 public class HttpServer {
 
@@ -35,20 +34,17 @@ public class HttpServer {
 
     private void listenAndRespond(Socket socket) {
         try (Socket client = socket) {
-            Scanner in = new Scanner(client.getInputStream());
+            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             //now the server is waiting for requests
-            if (in.hasNextLine()) {
-                HttpRequest request = parseRequest(in);
-                HttpResponse2 response = processRequest(request);
-                //sendResponse
-                ok(socket, response);
-            }
+            HttpRequest request = parseRequest(in);
+            HttpResponse2 response = processRequest(request);
+            ok(socket, response);
         } catch (IOException e) {
-            System.out.println("Echo error " + e);
+            System.out.println("Error " + e);
         }
     }
 
-    private HttpResponse2 processRequest(HttpRequest request) throws FileNotFoundException {
+    private HttpResponse2 processRequest(HttpRequest request) throws IOException {
         HttpResponse2 response = new HttpResponse2();
         if (request.isGet()) {
             if (request.isFile()) {
@@ -61,7 +57,11 @@ public class HttpServer {
                 response.setBody(fileNamesString);
             }
         } else {
-            //TODO POST
+            //write to file
+            File file = new File(request.getFileName());
+            FileWriter myWriter = new FileWriter(file);
+            myWriter.write(request.getBody());
+            myWriter.close();
         }
         return response;
     }
@@ -84,11 +84,11 @@ public class HttpServer {
             for (var header : response.getHeaders().entrySet()) {
                 stringBuilder.append(header.getKey()).append(":").append(header.getValue()).append("\r\n");
             }
-        } else {
-            stringBuilder.append("\r\n");
         }
         stringBuilder.append("\r\n");
-        stringBuilder.append(response.getBody()).append("\r\n");
+        if (!response.getBody().isEmpty()){
+            stringBuilder.append(response.getBody()).append("\r\n");
+        }
         return stringBuilder.toString();
     }
 
@@ -117,26 +117,26 @@ public class HttpServer {
         while (scanner.hasNextLine()) {
             data.append(scanner.nextLine()).append("\r\n");
         }
-        data.delete(data.length()-2,data.length());
+        data.delete(data.length() - 2, data.length());
         scanner.close();
         return data.toString();
     }
 
-
-    private HttpRequest parseRequest(Scanner in) {
+    private HttpRequest parseRequest(BufferedReader in) throws IOException {
         //TODO validate input
         HttpRequest request = new HttpRequest();
 
+
         //read the first line
-        String line = in.nextLine();
+        String line = in.readLine();
         String requestLine = line;
         String[] requestLineArguments = requestLine.split(" ");
-        //check if get or post
+
         boolean isGet = requestLineArguments[0].toLowerCase(Locale.ROOT).equals("get");
+        String path = requestLineArguments[1];
         if (isGet) {
             request.setMethod("get");
             //check if directory or file
-            String path = requestLineArguments[1];
             if (path.equals("/")) {
                 request.setFile(false);
             } else {
@@ -145,12 +145,24 @@ public class HttpServer {
                 request.setFileName(targetFileName);
             }
         } else {
+            request.setMethod("post");
+            String targetFileName = path.substring(1);
+            request.setFileName(targetFileName);
             //read any further headers if any
-            line = in.nextLine();
+            line = in.readLine();
             while (!line.equals("")) {
-                request.addHeaderPair(line);
-                line = in.nextLine();
+                int endOfKey = line.indexOf(":");
+                request.addHeadersPair(line.substring(0, endOfKey), line.substring(endOfKey + 1));
+                line = in.readLine();
             }
+
+            //read body
+            int contentLength = Integer.parseInt(request.getHeaders("Content-Length").trim());
+            char[] bodyArray = new char[contentLength];
+            in.read(bodyArray, 0, contentLength);
+            //TODO put a timeout if contentLength is longer that actual body in request
+            String body = new String(bodyArray);
+            request.setBody(body);
         }
         return request;
     }
