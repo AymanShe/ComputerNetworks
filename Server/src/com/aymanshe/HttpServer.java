@@ -39,7 +39,7 @@ public class HttpServer {
             HttpRequest request = parseRequest(in);
             HttpResponse2 response = processRequest(request);
             ok(socket, response);
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | IllegalAccessException e) {
             notFound(socket);
         } catch (IOException e) {
             System.out.println("Error " + e);
@@ -138,7 +138,7 @@ public class HttpServer {
         return data.toString();
     }
 
-    private HttpRequest parseRequest(BufferedReader in) throws IOException {
+    private HttpRequest parseRequest(BufferedReader in) throws IOException, IllegalAccessException {
         //TODO validate input
         HttpRequest request = new HttpRequest();
 
@@ -147,8 +147,9 @@ public class HttpServer {
         String line = in.readLine();
         String requestLine = line;
         String[] requestLineArguments = requestLine.split(" ");
+        String method = requestLineArguments[0];
 
-        boolean isGet = requestLineArguments[0].toLowerCase(Locale.ROOT).equals("get");
+        boolean isGet = method.toLowerCase(Locale.ROOT).equals("get");
         String path = requestLineArguments[1];
         if (isGet) {
             request.setMethod("get");
@@ -158,6 +159,9 @@ public class HttpServer {
             } else {
                 request.setFile(true);
                 String targetFileName = path.substring(1);
+                if (targetFileName.contains(".") || targetFileName.contains("/") || targetFileName.contains("\\") ){
+                    throw new IllegalAccessException();
+                }
                 request.setFileName(targetFileName);
             }
         } else {
