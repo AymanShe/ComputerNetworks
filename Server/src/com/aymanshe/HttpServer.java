@@ -32,16 +32,32 @@ public class HttpServer {
         }
     }
 
-    private void listenAndRespond(Socket socket) {
-        try (Socket client = socket) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+    private void listenAndRespond(Socket socket) throws IOException {
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             //now the server is waiting for requests
             HttpRequest request = parseRequest(in);
             HttpResponse2 response = processRequest(request);
             ok(socket, response);
+        } catch (FileNotFoundException e) {
+            notFound(socket);
         } catch (IOException e) {
             System.out.println("Error " + e);
+        } finally {
+            socket.close();
         }
+    }
+
+    private void notFound(Socket socket) throws IOException {
+        HttpResponse2 httpResponse = new HttpResponse2();
+        httpResponse.setStatus("HTTP/1.0 404 File Not Found");
+
+        String response = buildResponse(httpResponse);
+
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        out.write(response);
+        out.flush();
+        out.close();
     }
 
     private HttpResponse2 processRequest(HttpRequest request) throws IOException {
@@ -66,10 +82,10 @@ public class HttpServer {
         return response;
     }
 
-    private void ok(Socket socket, HttpResponse2 httpResponse2) throws IOException {
-        httpResponse2.setStatus("HTTP/1.0 200 Success");
+    private void ok(Socket socket, HttpResponse2 httpResponse) throws IOException {
+        httpResponse.setStatus("HTTP/1.0 200 Success");
 
-        String response = buildResponse(httpResponse2);
+        String response = buildResponse(httpResponse);
 
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         out.write(response);
@@ -86,7 +102,7 @@ public class HttpServer {
             }
         }
         stringBuilder.append("\r\n");
-        if (!response.getBody().isEmpty()){
+        if (response.getBody() != null && !response.getBody().isEmpty()){
             stringBuilder.append(response.getBody()).append("\r\n");
         }
         return stringBuilder.toString();
