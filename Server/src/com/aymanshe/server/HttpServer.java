@@ -133,13 +133,13 @@ public class HttpServer {
                 try {
                     String mimeType = Files.probeContentType(path);
                     response.addHeader("Content-Type", mimeType);
+                    if (attachment) {
+                        response.addHeader("Content-Disposition", "attachment");
+                    } else {
+                        response.addHeader("Content-Disposition", "inline");
+                    }
                 } catch (IOException e) {
                     log("Couldn't get file type. Header Content-Type is not included" + e.getMessage());
-                }
-                if (attachment) {
-                    response.addHeader("Content-Disposition", "attachment");
-                } else {
-                    response.addHeader("Content-Disposition", "inline");
                 }
             } else {
                 var fileNamesList = getDirectoryFiles();
