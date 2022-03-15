@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -14,11 +16,13 @@ public class HttpServer {
     int port;
     String path;
     boolean verbose;
+    boolean attachment;
 
-    public HttpServer(int port, String path, boolean verbose) {
+    public HttpServer(int port, String path, boolean verbose, boolean attachment) {
         this.port = port;
         this.path = path;
         this.verbose = verbose;
+        this.attachment = attachment;
     }
 
     public void run() throws IOException {
@@ -124,6 +128,14 @@ public class HttpServer {
             if (request.isFile()) {
                 String fileContent = getFileContent(request.getFileName());
                 response.setBody(fileContent);
+                String fullPath = path + "/" + request.getFileName();
+                Path path = new File(fullPath).toPath();
+                try {
+                    String mimeType = Files.probeContentType(path);
+                    response.addHeader("Content-Type", mimeType);
+                } catch (IOException e) {
+                    log("Couldn't get file type. Header Content-Type is not included" + e.getMessage());
+                }
             } else {
                 var fileNamesList = getDirectoryFiles();
                 //TODO check if files is empty
@@ -165,8 +177,13 @@ public class HttpServer {
             }
         }
         stringBuilder.append("\r\n");
-        if (response.getBody() != null && !response.getBody().isEmpty()){
+        if (response.getBody() != null && !response.getBody().isEmpty()) {
             stringBuilder.append(response.getBody()).append("\r\n");
+        }
+        if (attachment) {
+            response.addHeader("Content-Disposition", "attachment");
+        } else {
+            response.addHeader("Content-Disposition", "inline");
         }
         return stringBuilder.toString();
     }
@@ -192,14 +209,16 @@ public class HttpServer {
 
     private String getFileContent(String fileName) throws FileNotFoundException {
         log("trying to open file");
-        File file = new File(path +"/"+ fileName);
+        File file = new File(path + "/" + fileName);
         Scanner scanner = new Scanner(file);
         StringBuilder data = new StringBuilder();
         log("Reading file content");
         while (scanner.hasNextLine()) {
             data.append(scanner.nextLine()).append("\r\n");
         }
-        data.delete(data.length() - 2, data.length());
+        if (!data.isEmpty()) {
+            data.delete(data.length() - 2, data.length());
+        }
         scanner.close();
         return data.toString();
     }
@@ -228,7 +247,7 @@ public class HttpServer {
             } else {
                 request.setFile(true);
                 String targetFileName = path.substring(1);
-                if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\") ){
+                if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\")) {
                     log("Illegal Access trial encountered and stopped");
                     throw new IllegalAccessException();
                 }
@@ -240,7 +259,7 @@ public class HttpServer {
             log("Method is POST");
             request.setMethod("post");
             String targetFileName = path.substring(1);
-            if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\") ){
+            if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\")) {
                 log("Illegal Access trial encountered and stopped");
                 throw new IllegalAccessException();
             }
@@ -260,7 +279,7 @@ public class HttpServer {
 
             //read body
             String contentHeader = request.getHeaders("Content-Length");
-            if(contentHeader == null || contentHeader.isEmpty()){
+            if (contentHeader == null || contentHeader.isEmpty()) {
                 log("Content-Length header is missing");
                 throw new MissingHeaderException("Content-Length header is missing");
             }
@@ -269,14 +288,14 @@ public class HttpServer {
             in.read(bodyArray, 0, contentLength);
             //TODO put a timeout if contentLength is longer that actual body in request
             String body = new String(bodyArray);
-            log("Body is: "+ body);
+            log("Body is: " + body);
             request.setBody(body);
         }
         return request;
     }
 
-    void log(String message){
-        if (verbose){
+    void log(String message) {
+        if (verbose) {
             System.out.println(message);
         }
     }

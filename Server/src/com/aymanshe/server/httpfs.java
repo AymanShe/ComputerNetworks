@@ -16,6 +16,7 @@ public class httpfs {
         int port = 8080;
         String path = ".";
         boolean verbose = false;
+        boolean attachment = false;
 
         // region validations
         if (args.length == 0) {
@@ -84,6 +85,7 @@ public class httpfs {
                         path = pathString.toString();
                     }
                     case "-p" -> port = Integer.parseInt(args[++i]);
+                    case "-a" -> attachment = true;
                 }
             }
 
@@ -99,7 +101,7 @@ public class httpfs {
             File file = new File(path);
             System.out.println("Working directory set to " + file.getAbsolutePath());
         }
-        HttpServer httpServer = new HttpServer(port, path, verbose);
+        HttpServer httpServer = new HttpServer(port, path, verbose, attachment);
         try {
             httpServer.run();
         } catch (IOException e) {
