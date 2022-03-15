@@ -1,4 +1,4 @@
-package com.aymanshe;
+package com.aymanshe.server;
 
 import java.util.*;
 

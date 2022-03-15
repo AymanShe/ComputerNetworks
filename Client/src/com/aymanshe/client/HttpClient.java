@@ -1,10 +1,9 @@
-package com.aymanshe;
+package com.aymanshe.client;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.text.BreakIterator;
 import java.util.Scanner;
 
 public class HttpClient {

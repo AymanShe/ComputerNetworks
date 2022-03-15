@@ -1,4 +1,4 @@
-package com.aymanshe;
+package com.aymanshe.server;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -41,7 +41,7 @@ public class HttpServer {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             //now the server is waiting for requests
             HttpRequest request = parseRequest(in);
-            HttpResponse2 response = processRequest(request);
+            HttpResponse response = processRequest(request);
             ok(socket, response);
         } catch (FileNotFoundException e) {
             notFound(socket);
@@ -60,7 +60,7 @@ public class HttpServer {
     private void internal(Socket socket) throws IOException {
         log("Internal exception");
         log("Response status code 500");
-        HttpResponse2 httpResponse = new HttpResponse2();
+        HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatus("HTTP/1.0 500 Unexpected Error. Try Again");
 
         String response = buildResponse(httpResponse);
@@ -75,7 +75,7 @@ public class HttpServer {
     private void badRequest(Socket socket, String message) throws IOException {
         log("Bad request");
         log("Response status code 400");
-        HttpResponse2 httpResponse = new HttpResponse2();
+        HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatus("HTTP/1.0 400 " + message);
 
         String response = buildResponse(httpResponse);
@@ -90,7 +90,7 @@ public class HttpServer {
     private void notFound(Socket socket) throws IOException {
         log("File not found");
         log("Response status code 404");
-        HttpResponse2 httpResponse = new HttpResponse2();
+        HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatus("HTTP/1.0 404 File Not Found");
 
         String response = buildResponse(httpResponse);
@@ -105,7 +105,7 @@ public class HttpServer {
     private void illegalAccess(Socket socket) throws IOException {
         log("Illegal Access");
         log("Response status code 404");
-        HttpResponse2 httpResponse = new HttpResponse2();
+        HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatus("HTTP/1.0 404 File Not Found");
 
         String response = buildResponse(httpResponse);
@@ -117,9 +117,9 @@ public class HttpServer {
         out.close();
     }
 
-    private HttpResponse2 processRequest(HttpRequest request) throws IOException {
+    private HttpResponse processRequest(HttpRequest request) throws IOException {
         log("Trying to process request");
-        HttpResponse2 response = new HttpResponse2();
+        HttpResponse response = new HttpResponse();
         if (request.isGet()) {
             if (request.isFile()) {
                 String fileContent = getFileContent(request.getFileName());
@@ -142,7 +142,7 @@ public class HttpServer {
         return response;
     }
 
-    private void ok(Socket socket, HttpResponse2 httpResponse) throws IOException {
+    private void ok(Socket socket, HttpResponse httpResponse) throws IOException {
         log("Request was processed successfully");
         log("Response status code: 200");
         httpResponse.setStatus("HTTP/1.0 200 Success");
@@ -156,7 +156,7 @@ public class HttpServer {
         out.close();
     }
 
-    private String buildResponse(HttpResponse2 response) {
+    private String buildResponse(HttpResponse response) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(response.getStatus()).append("\r\n");
         if (!response.getHeaders().isEmpty()) {

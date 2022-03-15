@@ -1,4 +1,4 @@
-package com.aymanshe;
+package com.aymanshe.client;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,7 +46,7 @@ class CommandParser {
                     }
                     body = body.substring(1);
                     index = body.lastIndexOf("'");
-                    if (index == body.length() - 1) {// there is a colon at the end of the argument, hence it is the end of
+                    if (index == body.length() - 1) {// there is a quotation at the end of the argument, hence it is the end of
                         // inline body
                         body = body.substring(0, body.length() - 1);
                     } else {// the body has more parts that are seperated by space
@@ -54,7 +54,7 @@ class CommandParser {
                         while (!reachedEnd) {
                             if (i + 1 >= args.length) {
                                 throw new CommandParseException(
-                                        "string finished but the closing colon for inline body was not found");
+                                        "string finished but the closing quotation for inline body was not found");
                             }
                             String next = args[++i];
                             // check if it is the end body by checking the ' and making sure it is not in

@@ -1,4 +1,4 @@
-package com.aymanshe;
+package com.aymanshe.client;
 
 import java.util.HashMap;
 import java.util.Map;

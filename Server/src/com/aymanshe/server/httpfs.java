@@ -1,4 +1,4 @@
-package com.aymanshe;
+package com.aymanshe.server;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class httpfs {
 
         try {
             validateArguments(args);
-        } catch (CommandParseException2 e) {
+        } catch (CommandParseException e) {
             System.out.println(e.getMessage());
             return;
         }
@@ -46,7 +46,7 @@ public class httpfs {
                         StringBuilder pathString = new StringBuilder(args[++i]);
                         int index = pathString.indexOf("'");
                         if (index != 0) {
-                            throw new CommandParseException2("the path has to start and end with single quotation.");
+                            throw new CommandParseException("the path has to start and end with single quotation.");
                         }
                         pathString = new StringBuilder(pathString.substring(1));
                         index = pathString.lastIndexOf("'");
@@ -56,7 +56,7 @@ public class httpfs {
                             boolean reachedEnd = false;
                             while (!reachedEnd) {
                                 if (i + 1 >= args.length) {
-                                    throw new CommandParseException2("path string finished but the closing quotation for inline body was not found");
+                                    throw new CommandParseException("path string finished but the closing quotation for inline body was not found");
                                 }
                                 String next = args[++i];
                                 // check if it is the end path by checking the ' and making sure it is not in the middle of the string
@@ -89,7 +89,7 @@ public class httpfs {
 
             validatePath(path);
 
-        } catch (CommandParseException2 e) {
+        } catch (CommandParseException e) {
             System.out.println(e.getMessage());
             return;
         }
@@ -111,35 +111,35 @@ public class httpfs {
         //TODO
     }
 
-    private static void validateArguments(String[] args) throws CommandParseException2 {
+    private static void validateArguments(String[] args) throws CommandParseException {
         Map<String, Boolean> map = new HashMap<>();
         for (int i = 1; i < args.length - 1; i++) {
             switch (args[i]) {
                 case "-v" -> {
                     if (map.get("-v") != null) {
-                        throw new CommandParseException2("Duplicate argument -v");
+                        throw new CommandParseException("Duplicate argument -v");
                     }
                     map.put("-v", true);
                 }
                 case "-d" -> {
                     if (map.get("-d") != null) {
-                        throw new CommandParseException2("Duplicate argument -d");
+                        throw new CommandParseException("Duplicate argument -d");
                     }
                     map.put("-d", true);
                     while (args[++i].lastIndexOf("'") != args[i].length() - 1) {
                         if (i >= args.length - 1) {
-                            throw new CommandParseException2("string finished but the closing colon for inline body was not found");
+                            throw new CommandParseException("string finished but the closing colon for inline body was not found");
                         }
                     }
                 }
                 case "-p" -> {
                     if (map.get("-p") != null) {
-                        throw new CommandParseException2("Duplicate argument -p");
+                        throw new CommandParseException("Duplicate argument -p");
                     }
                     map.put("-p", true);
                     i++;
                 }
-                default -> throw new CommandParseException2("There is an unknown argument: " + args[i]);
+                default -> throw new CommandParseException("There is an unknown argument: " + args[i]);
             }
         }
     }

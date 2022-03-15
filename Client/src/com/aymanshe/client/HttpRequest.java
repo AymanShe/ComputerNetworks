@@ -1,4 +1,4 @@
-package com.aymanshe;
+package com.aymanshe.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public class HttpRequest {
     private String bodyFilePath;
     private String path;
     private String address;
-    private int port = 80;
+    private int port = 8080;
     private boolean writeToFile = false;
     private String fileName;
 

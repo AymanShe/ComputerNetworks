@@ -1,14 +1,14 @@
-package com.aymanshe;
+package com.aymanshe.server;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpResponse2 {
+public class HttpResponse {
     String status;
     Map<String, String> headers;
     String body;
 
-    public HttpResponse2() {
+    public HttpResponse() {
         headers = new HashMap<>();
     }
 
