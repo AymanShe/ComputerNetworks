@@ -43,8 +43,10 @@ public class HttpServer {
             HttpRequest request = parseRequest(in);
             HttpResponse2 response = processRequest(request);
             ok(socket, response);
-        } catch (FileNotFoundException | IllegalAccessException e) {
+        } catch (FileNotFoundException e) {
             notFound(socket);
+        } catch (IllegalAccessException e) {
+            illegalAccess(socket);
         } catch (IOException e) {
             internal(socket);
         } catch (MissingHeaderException e) {
@@ -87,6 +89,21 @@ public class HttpServer {
 
     private void notFound(Socket socket) throws IOException {
         log("File not found");
+        log("Response status code 404");
+        HttpResponse2 httpResponse = new HttpResponse2();
+        httpResponse.setStatus("HTTP/1.0 404 File Not Found");
+
+        String response = buildResponse(httpResponse);
+
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        out.write(response);
+        log("Sending Response");
+        out.flush();
+        out.close();
+    }
+
+    private void illegalAccess(Socket socket) throws IOException {
+        log("Illegal Access");
         log("Response status code 404");
         HttpResponse2 httpResponse = new HttpResponse2();
         httpResponse.setStatus("HTTP/1.0 404 File Not Found");
@@ -211,7 +228,7 @@ public class HttpServer {
             } else {
                 request.setFile(true);
                 String targetFileName = path.substring(1);
-                if (targetFileName.contains(".") || targetFileName.contains("/") || targetFileName.contains("\\") ){
+                if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\") ){
                     log("Illegal Access trial encountered and stopped");
                     throw new IllegalAccessException();
                 }
@@ -223,7 +240,12 @@ public class HttpServer {
             log("Method is POST");
             request.setMethod("post");
             String targetFileName = path.substring(1);
+            if (targetFileName.contains(".") || targetFileName.contains("/") || targetFileName.contains("\\") ){
+                log("Illegal Access trial encountered and stopped");
+                throw new IllegalAccessException();
+            }
             log("New file name: " + targetFileName);
+
             request.setFileName(targetFileName);
             //read any further headers if any
             line = in.readLine();
