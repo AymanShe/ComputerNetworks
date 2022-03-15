@@ -136,6 +136,11 @@ public class HttpServer {
                 } catch (IOException e) {
                     log("Couldn't get file type. Header Content-Type is not included" + e.getMessage());
                 }
+                if (attachment) {
+                    response.addHeader("Content-Disposition", "attachment");
+                } else {
+                    response.addHeader("Content-Disposition", "inline");
+                }
             } else {
                 var fileNamesList = getDirectoryFiles();
                 //TODO check if files is empty
@@ -179,11 +184,6 @@ public class HttpServer {
         stringBuilder.append("\r\n");
         if (response.getBody() != null && !response.getBody().isEmpty()) {
             stringBuilder.append(response.getBody()).append("\r\n");
-        }
-        if (attachment) {
-            response.addHeader("Content-Disposition", "attachment");
-        } else {
-            response.addHeader("Content-Disposition", "inline");
         }
         return stringBuilder.toString();
     }
