@@ -4,29 +4,31 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.function.BiFunction;
 
 public class HttpServer {
 
     int port;
     String path;
+    boolean verbose;
 
-    public HttpServer(int port, String path) {
+    public HttpServer(int port, String path, boolean verbose) {
         this.port = port;
         this.path = path;
+        this.verbose = verbose;
     }
 
     public void run() throws IOException {
         try (ServerSocket server = new ServerSocket(port, 0, InetAddress.getLoopbackAddress())) {
-            System.out.println("Server started listening on port :" + port);
+            log("Server started listening on port :" + port);
 
             while (true) {
+                log("waiting for new requests\n");
                 Socket client = server.accept();
+                log("Incoming request");
                 listenAndRespond(client);
             }
         } catch (IOException e) {
@@ -48,11 +50,14 @@ public class HttpServer {
         } catch (MissingHeaderException e) {
             badRequest(socket, e.getMessage());
         } finally {
+            log("Closing connection");
             socket.close();
         }
     }
 
     private void internal(Socket socket) throws IOException {
+        log("Internal exception");
+        log("Response status code 500");
         HttpResponse2 httpResponse = new HttpResponse2();
         httpResponse.setStatus("HTTP/1.0 500 Unexpected Error. Try Again");
 
@@ -60,11 +65,14 @@ public class HttpServer {
 
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         out.write(response);
+        log("Sending Response");
         out.flush();
         out.close();
     }
 
     private void badRequest(Socket socket, String message) throws IOException {
+        log("Bad request");
+        log("Response status code 400");
         HttpResponse2 httpResponse = new HttpResponse2();
         httpResponse.setStatus("HTTP/1.0 400 " + message);
 
@@ -72,11 +80,14 @@ public class HttpServer {
 
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         out.write(response);
+        log("Sending Response");
         out.flush();
         out.close();
     }
 
     private void notFound(Socket socket) throws IOException {
+        log("File not found");
+        log("Response status code 404");
         HttpResponse2 httpResponse = new HttpResponse2();
         httpResponse.setStatus("HTTP/1.0 404 File Not Found");
 
@@ -84,11 +95,13 @@ public class HttpServer {
 
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         out.write(response);
+        log("Sending Response");
         out.flush();
         out.close();
     }
 
     private HttpResponse2 processRequest(HttpRequest request) throws IOException {
+        log("Trying to process request");
         HttpResponse2 response = new HttpResponse2();
         if (request.isGet()) {
             if (request.isFile()) {
@@ -103,7 +116,9 @@ public class HttpServer {
         } else {
             //write to file
             File file = new File(request.getFileName());
+            log("Creating new if it does not exist");
             FileWriter myWriter = new FileWriter(file);
+            log("Writing content to file");
             myWriter.write(request.getBody());
             myWriter.close();
         }
@@ -111,12 +126,15 @@ public class HttpServer {
     }
 
     private void ok(Socket socket, HttpResponse2 httpResponse) throws IOException {
+        log("Request was processed successfully");
+        log("Response status code: 200");
         httpResponse.setStatus("HTTP/1.0 200 Success");
 
         String response = buildResponse(httpResponse);
 
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         out.write(response);
+        log("Sending Response");
         out.flush();
         out.close();
     }
@@ -137,6 +155,7 @@ public class HttpServer {
     }
 
     private List<String> getDirectoryFiles() {
+        log("Getting directory files list");
         File folder = new File(path);
         File[] files = folder.listFiles();
         List<String> fileNames = new ArrayList<>();
@@ -155,9 +174,11 @@ public class HttpServer {
     }
 
     private String getFileContent(String fileName) throws FileNotFoundException {
+        log("trying to open file");
         File file = new File(fileName);
         Scanner scanner = new Scanner(file);
         StringBuilder data = new StringBuilder();
+        log("Reading file content");
         while (scanner.hasNextLine()) {
             data.append(scanner.nextLine()).append("\r\n");
         }
@@ -173,6 +194,7 @@ public class HttpServer {
 
         //read the first line
         String line = in.readLine();
+        log("Trying to parse");
         String requestLine = line;
         String[] requestLineArguments = requestLine.split(" ");
         String method = requestLineArguments[0];
@@ -180,33 +202,44 @@ public class HttpServer {
         boolean isGet = method.toLowerCase(Locale.ROOT).equals("get");
         String path = requestLineArguments[1];
         if (isGet) {
+            log("Method is GET");
             request.setMethod("get");
             //check if directory or file
             if (path.equals("/")) {
+                log("Requesting directory file list");
                 request.setFile(false);
             } else {
                 request.setFile(true);
                 String targetFileName = path.substring(1);
                 if (targetFileName.contains(".") || targetFileName.contains("/") || targetFileName.contains("\\") ){
+                    log("Illegal Access trial encountered and stopped");
                     throw new IllegalAccessException();
                 }
+                log("Requesting specific file");
                 request.setFileName(targetFileName);
+                log("File name: " + targetFileName);
             }
         } else {
+            log("Method is POST");
             request.setMethod("post");
             String targetFileName = path.substring(1);
+            log("New file name: " + targetFileName);
             request.setFileName(targetFileName);
             //read any further headers if any
             line = in.readLine();
             while (!line.equals("")) {
                 int endOfKey = line.indexOf(":");
-                request.addHeadersPair(line.substring(0, endOfKey), line.substring(endOfKey + 1));
+                String key = line.substring(0, endOfKey);
+                String value = line.substring(endOfKey + 1);
+                request.addHeadersPair(key, value);
+                log("Header => key: " + key + ", Value: " + value);
                 line = in.readLine();
             }
 
             //read body
             String contentHeader = request.getHeaders("Content-Length");
             if(contentHeader == null || contentHeader.isEmpty()){
+                log("Content-Length header is missing");
                 throw new MissingHeaderException("Content-Length header is missing");
             }
             int contentLength = Integer.parseInt(request.getHeaders("Content-Length").trim());
@@ -214,8 +247,15 @@ public class HttpServer {
             in.read(bodyArray, 0, contentLength);
             //TODO put a timeout if contentLength is longer that actual body in request
             String body = new String(bodyArray);
+            log("Body is: "+ body);
             request.setBody(body);
         }
         return request;
+    }
+
+    void log(String message){
+        if (verbose){
+            System.out.println(message);
+        }
     }
 }
