@@ -29,6 +29,8 @@ public class HttpServer {
                 Socket client = server.accept();
                 listenAndRespond(client);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -42,10 +44,36 @@ public class HttpServer {
         } catch (FileNotFoundException | IllegalAccessException e) {
             notFound(socket);
         } catch (IOException e) {
-            System.out.println("Error " + e);
+            internal(socket);
+        } catch (MissingHeaderException e) {
+            badRequest(socket, e.getMessage());
         } finally {
             socket.close();
         }
+    }
+
+    private void internal(Socket socket) throws IOException {
+        HttpResponse2 httpResponse = new HttpResponse2();
+        httpResponse.setStatus("HTTP/1.0 500 Unexpected Error. Try Again");
+
+        String response = buildResponse(httpResponse);
+
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        out.write(response);
+        out.flush();
+        out.close();
+    }
+
+    private void badRequest(Socket socket, String message) throws IOException {
+        HttpResponse2 httpResponse = new HttpResponse2();
+        httpResponse.setStatus("HTTP/1.0 400 " + message);
+
+        String response = buildResponse(httpResponse);
+
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        out.write(response);
+        out.flush();
+        out.close();
     }
 
     private void notFound(Socket socket) throws IOException {
@@ -138,7 +166,7 @@ public class HttpServer {
         return data.toString();
     }
 
-    private HttpRequest parseRequest(BufferedReader in) throws IOException, IllegalAccessException {
+    private HttpRequest parseRequest(BufferedReader in) throws IOException, IllegalAccessException, MissingHeaderException {
         //TODO validate input
         HttpRequest request = new HttpRequest();
 
@@ -177,6 +205,10 @@ public class HttpServer {
             }
 
             //read body
+            String contentHeader = request.getHeaders("Content-Length");
+            if(contentHeader == null || contentHeader.isEmpty()){
+                throw new MissingHeaderException("Content-Length header is missing");
+            }
             int contentLength = Integer.parseInt(request.getHeaders("Content-Length").trim());
             char[] bodyArray = new char[contentLength];
             in.read(bodyArray, 0, contentLength);
