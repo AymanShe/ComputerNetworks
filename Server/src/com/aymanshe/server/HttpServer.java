@@ -192,7 +192,7 @@ public class HttpServer {
 
     private String getFileContent(String fileName) throws FileNotFoundException {
         log("trying to open file");
-        File file = new File(fileName);
+        File file = new File(path +"/"+ fileName);
         Scanner scanner = new Scanner(file);
         StringBuilder data = new StringBuilder();
         log("Reading file content");
