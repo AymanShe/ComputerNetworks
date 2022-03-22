@@ -55,6 +55,8 @@ public class HttpServer {
             internal(socket);
         } catch (MissingHeaderException e) {
             badRequest(socket, e.getMessage());
+        } catch (CommandParseException e) {
+            badRequest(socket, e.getMessage());
         } finally {
             log("Closing connection");
             socket.close();
@@ -223,7 +225,7 @@ public class HttpServer {
         return data.toString();
     }
 
-    private HttpRequest parseRequest(BufferedReader in) throws IOException, IllegalAccessException, MissingHeaderException {
+    private HttpRequest parseRequest(BufferedReader in) throws IOException, IllegalAccessException, MissingHeaderException, CommandParseException {
         //TODO validate input
         HttpRequest request = new HttpRequest();
 
@@ -262,6 +264,10 @@ public class HttpServer {
             if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\")) {
                 log("Illegal Access trial encountered and stopped");
                 throw new IllegalAccessException();
+            }
+            if(targetFileName.isBlank()){
+                log("target file name cannot be empty");
+                throw new CommandParseException("Target file name cannot be empty");
             }
             log("File name: " + targetFileName);
 
