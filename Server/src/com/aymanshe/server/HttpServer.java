@@ -151,7 +151,7 @@ public class HttpServer {
             }
         } else {
             //write to file
-            File file = new File(path + "/" +request.getFileName());
+            File file = new File(path + "/" + request.getFileName());
             log("Creating new if it does not exist");
             FileWriter myWriter = new FileWriter(file);
             log("Writing content to file");
@@ -270,7 +270,7 @@ public class HttpServer {
                 log("Illegal Access trial encountered and stopped");
                 throw new IllegalAccessException();
             }
-            if(targetFileName.isBlank()){
+            if (targetFileName.isBlank()) {
                 log("target file name cannot be empty");
                 throw new CommandParseException("Target file name cannot be empty");
             }
