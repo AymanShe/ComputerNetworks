@@ -149,7 +149,7 @@ public class HttpServer {
             }
         } else {
             //write to file
-            File file = new File(request.getFileName());
+            File file = new File(path + "/" +request.getFileName());
             log("Creating new if it does not exist");
             FileWriter myWriter = new FileWriter(file);
             log("Writing content to file");

@@ -141,6 +141,12 @@ public class httpfs {
                     map.put("-p", true);
                     i++;
                 }
+                case "-a" -> {
+                    if (map.get("-a") != null) {
+                        throw new CommandParseException("Duplicate argument -a");
+                    }
+                    map.put("-a", true);
+                }
                 default -> throw new CommandParseException("There is an unknown argument: " + args[i]);
             }
         }
