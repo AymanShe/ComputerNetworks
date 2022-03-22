@@ -10,7 +10,7 @@ public class HttpRequest {
     //    private boolean inlineBody;
     private String body;
     //    private String bodyFilePath;
-//    private String path;
+    private String Directory;
 //    private String address;
 //    private int port = 80;
 //    private boolean writeToFile = false;
@@ -55,13 +55,13 @@ public class HttpRequest {
         return method.toLowerCase(Locale.ROOT).equals("post");
     }
 
-    //    public String getPath() {
-//        return path;
-//    }
-//
-//    public void setPath(String path) {
-//        this.path = path;
-//    }
+        public String getDirectory() {
+        return Directory;
+    }
+
+    public void setDirectory(String Directory) {
+        this.Directory = Directory;
+    }
 //
 //    public List<String> getHeader() {
 //        return header;

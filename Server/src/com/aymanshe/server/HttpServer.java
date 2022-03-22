@@ -144,7 +144,7 @@ public class HttpServer {
                     log("Couldn't get file type. Header Content-Type is not included" + e.getMessage());
                 }
             } else {
-                var fileNamesList = getDirectoryFiles();
+                var fileNamesList = getDirectoryFiles(request.getDirectory());
                 //TODO check if files is empty
                 var fileNamesString = getDirectoryFilesAsString(fileNamesList);
                 response.setBody(fileNamesString);
@@ -190,9 +190,9 @@ public class HttpServer {
         return stringBuilder.toString();
     }
 
-    private List<String> getDirectoryFiles() {
+    private List<String> getDirectoryFiles(String request) {
         log("Getting directory files list");
-        File folder = new File(path);
+        File folder = new File(path + request);
         File[] files = folder.listFiles();
         List<String> fileNames = new ArrayList<>();
         for (File file : files) {
@@ -243,13 +243,18 @@ public class HttpServer {
             log("Method is GET");
             request.setMethod("get");
             //check if directory or file
-            if (path.equals("/")) {
+            if (path.endsWith("/")) {
+                if (path.contains("..")) {
+                    log("Illegal Access trial encountered and stopped");
+                    throw new IllegalAccessException();
+                }
                 log("Requesting directory file list");
                 request.setFile(false);
+                request.setDirectory(path);
             } else {
                 request.setFile(true);
                 String targetFileName = path.substring(1);
-                if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\")) {
+                if (targetFileName.contains("..")) {
                     log("Illegal Access trial encountered and stopped");
                     throw new IllegalAccessException();
                 }
