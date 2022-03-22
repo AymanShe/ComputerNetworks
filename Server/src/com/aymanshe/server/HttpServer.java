@@ -266,7 +266,7 @@ public class HttpServer {
             log("Method is POST");
             request.setMethod("post");
             String targetFileName = path.substring(1);
-            if (targetFileName.contains("..") || targetFileName.contains("/") || targetFileName.contains("\\")) {
+            if (targetFileName.contains("..")) {
                 log("Illegal Access trial encountered and stopped");
                 throw new IllegalAccessException();
             }
