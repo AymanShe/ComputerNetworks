@@ -1,5 +1,8 @@
 package com.aymanshe.client;
 
+import com.aymanshe.client.udp.ReliableUdpClient;
+import com.aymanshe.client.udp.UdpClient;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,8 +44,8 @@ public class httpc {
 
             if (!httpRequest.getMethod().equals("HELP")) {
                 // send the request and display content
-                HttpClient httpClient = new HttpClient();
-                HttpResponse httpResponse = httpClient.sendRequest(httpRequest);
+                ReliableUdpClient httpClient = new ReliableUdpClient();
+                HttpResponse httpResponse = httpClient.sendReliably(httpRequest);
                 displayResult(httpRequest, httpResponse);
             } else {
                 displayHelp(args);

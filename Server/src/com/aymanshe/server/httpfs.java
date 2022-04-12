@@ -1,5 +1,7 @@
 package com.aymanshe.server;
 
+import com.aymanshe.server.udp.UdpServer;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -101,7 +103,7 @@ public class httpfs {
             File file = new File(path);
             System.out.println("Working directory set to " + file.getAbsolutePath());
         }
-        HttpServer httpServer = new HttpServer(port, path, verbose, attachment);
+        UdpServer httpServer = new UdpServer(port, path, verbose, attachment);
         try {
             httpServer.run();
         } catch (IOException e) {

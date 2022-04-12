@@ -122,4 +122,26 @@ public class HttpRequest {
     public  void  addHeaderPair(String fullHeader){
         header.add(fullHeader);
     }
+    public String getPayload(){
+        String payload = getMethod() + " " + (getPath().isEmpty()? "/" : getPath()) + " " + "HTTP/1.0\r\n";
+
+        if (!getHeader().isEmpty()){
+            StringBuilder headers = new StringBuilder();
+            for(String header : getHeader()) {
+                headers.append(header);
+                headers.append("\r\n");
+            }
+            payload += headers;
+        }
+
+        if (getMethod().equals("POST")){
+            payload += "Content-Length: " + getBody().length() + "\r\n\r\n";
+            payload += getBody();
+        }else{
+            payload += "\r\n";
+        }
+
+        return payload;
+
+    }
 }
