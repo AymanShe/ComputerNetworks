@@ -4,17 +4,19 @@ import com.aymanshe.shared.Packet;
 import com.aymanshe.client.HttpRequest;
 import com.aymanshe.client.HttpResponse;
 import com.aymanshe.shared.PacketTypes;
+import com.aymanshe.shared.SentPacket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
+import java.util.*;
 
 public class ReliableUdpClient {
     private static final String ROUTER_HOST = "localhost";
     private static final int ROUTER_PORT = 3000;
     private int clientSequenceNumber;
+    private SentPacket[] sentPackets;
 
     private final UdpClient udpClient;
 
@@ -41,6 +43,8 @@ public class ReliableUdpClient {
                 .create();
         udpClient.sendPacket(p);
 
+        addToSentPackets(p);
+
         //receive response
         Packet response = udpClient.receivePacket();
 
@@ -52,6 +56,24 @@ public class ReliableUdpClient {
         return HttpResponse.parseResponse(in);
     }
 
+    private void addToSentPackets(Packet packet) {
+        int index = clientSequenceNumber % 10;
+        sentPackets[index] = new SentPacket(packet, false);
+    }
+
+    private Packet receivePacket(long sequenceNumber){
+
+
+    }
+
+    private boolean findPacket(long sequenceNumber){
+        for(Packet packet: sentPackets){
+            if(singleItem.equalsIgnoreCase(itemToBeSearched)){
+                isItemFound = true;
+                return isItemFound;
+            }
+        }
+    }
     private void Handshake(InetSocketAddress serverAddress) throws Exception {
         Packet p = new Packet.Builder()
                 .setType(PacketTypes.SYN)
